@@ -7,10 +7,11 @@
 <style>
 body {
     margin: 0;
-    height: 100vh;
+    min-height: 100vh;          /* height yerine min-height */
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;    /* center yerine flex-start */
+    padding-top: 40px;          /* üst boşluk */
     background: #e9ecef;
     font-family: -apple-system, BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
 }
@@ -575,4 +576,5 @@ updateStatsPanel();
 
 </script>
 </body>
+
 </html>
