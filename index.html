@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Codigit</title>
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #e9ecef;
+    font-family: -apple-system, BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+}
+
+.app-container {
+    position: relative;
+    width: 540px;
+    padding: 40px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* Language top right */
+.lang-box {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.lang-box select {
+    border: none;
+    background: #f2f2f2;
+    border-radius: 10px;
+    padding: 4px 8px;
+}
+
+/* Branding */
+.brand {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.tagline {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.rules {
+    text-align: left;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.rule-line {
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.rule-box {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    margin-right: 8px;
+}
+
+.green-box { background: #30d158; }
+.yellow-box { background: #ffd60a; }
+.gray-box { background: #8e8e93; }
+
+.progress-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.progress-segment {
+    height: 12px;
+    background: #dcdcdc;
+    border-radius: 6px;
+}
+
+.progress-segment.active { background: #ff3b30; }
+.progress-segment.win { background: #30d158; }
+
+button {
+    background: #0071e3;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.secondary { background: #f2f2f2; color: #333; }
+
+select {
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+#gameBoard {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+input.digit {
+    width: 48px;
+    height: 58px;
+    font-size: 22px;
+    text-align: center;
+    margin: 6px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+}
+
+.historyRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 6px;
+}
+
+.box {
+    width: 40px;
+    height: 50px;
+    margin: 4px;
+    line-height: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+.correct { background: #30d158; color: white; }
+.wrongPlace { background: #ffd60a; }
+.wrong { background: #8e8e93; color: white; }
+
+.resultText { margin-left: 12px; font-size: 13px; color: #888; }
+
+#digitPanel {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.digitKey {
+    width: 36px;
+    height: 36px;
+    margin: 4px;
+    line-height: 36px;
+    border-radius: 8px;
+    font-weight: 600;
+    background: #e5e5e5;
+}
+
+.key-correct { background: #30d158; color: white; }
+.key-wrongPlace { background: #ffd60a; }
+.key-wrong { background: #8e8e93; color: white; }
+
+#statusMessage { margin-top: 20px; min-height: 40px; }
+
+.stats {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+    color: #555;
+    text-align: left;
+}
+
+/* Signature */
+.signature {
+    position: absolute;
+    bottom: 18px;
+    right: 22px;
+    font-size: 11px;
+    letter-spacing: 0.6px;
+    opacity: 0.35;
+    transition: opacity 0.3s ease;
+}
+
+.signature:hover {
+    opacity: 0.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app-container">
+
+<div class="signature">crafted with precision by YA.AY | v1.0</div>
+
+<div class="lang-box">
+🌐 <select id="languageSelect" onchange="changeLanguage()">
+<option value="en">EN</option>
+<option value="tr">TR</option>
+<option value="de">DE</option>
+</select>
+</div>
+
+<div class="brand">Codigit</div>
+<div class="tagline">The Precision Number Game</div>
+
+<div class="rules">
+<span id="rule1"></span><br>
+<span id="rule2"></span>
+<div class="rule-line"><div class="rule-box green-box"></div><span id="ruleCorrect"></span></div>
+<div class="rule-line"><div class="rule-box yellow-box"></div><span id="ruleWrongPlace"></span></div>
+<div class="rule-line"><div class="rule-box gray-box"></div><span id="ruleWrong"></span></div>
+</div>
+
+<div class="progress-container" id="progressContainer"></div>
+
+<label id="digitLabel"></label>
+<select id="digitCount">
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+</select>
+
+<br><br>
+
+<button onclick="startGame()" id="startBtn"></button>
+<button class="secondary" onclick="revealAnswer()" id="revealBtn" disabled></button>
+
+<div id="history"></div>
+<div id="gameBoard"></div>
+
+<button onclick="checkGuess()" id="submitBtn" disabled></button>
+
+<div id="statusMessage"></div>
+<div id="digitPanel"></div>
+
+<div class="stats" id="statsPanel"></div>
+<button class="secondary" onclick="resetStatistics()" id="resetBtn"></button>
+
+</div>
+
+
+
+<script>
+
+/* --- Language system --- */
+
+let currentLanguage = localStorage.getItem("digitLang") || "en";
+
+const translations = {
+en:{
+rule1:"• First digit cannot be 0",
+rule2:"• No repeated digits",
+correct:"Correct position",
+wrongPlace:"Correct digit, wrong position",
+wrong:"Digit not in target",
+digitLabel:"Digit Length:",
+start:"Start Game",
+reveal:"Reveal",
+submit:"Submit Guess",
+reset:"Reset Statistics",
+statsTitle:"Statistics",
+games:"Games",
+wins:"Wins",
+losses:"Losses",
+winRate:"Win Rate",
+avgAttempts:"Avg Attempts (wins)",
+currentStreak:"Current Streak",
+bestStreak:"Best Streak",
+enterAll:"Please enter all digits.",
+noZero:"First digit cannot be 0.",
+noRepeat:"No repeated digits allowed.",
+won:"🎉 You won! The number was ",
+lost:"Game Over. The number was ",
+revealed:"The correct number was ",
+resetMsg:"Statistics have been reset."
+},
+tr:{
+rule1:"• İlk basamak 0 olamaz",
+rule2:"• Tekrarlanan rakam yok",
+correct:"Doğru pozisyon",
+wrongPlace:"Doğru rakam, yanlış pozisyon",
+wrong:"Rakam hedefte yok",
+digitLabel:"Basamak Sayısı:",
+start:"Oyunu Başlat",
+reveal:"Göster",
+submit:"Tahmin Et",
+reset:"İstatistikleri Sıfırla",
+statsTitle:"İstatistikler",
+games:"Oyun",
+wins:"Kazanç",
+losses:"Kayıp",
+winRate:"Kazanma %",
+avgAttempts:"Ortalama Deneme",
+currentStreak:"Seri",
+bestStreak:"En İyi Seri",
+enterAll:"Lütfen tüm rakamları girin.",
+noZero:"İlk basamak 0 olamaz.",
+noRepeat:"Tekrarlanan rakam kullanılamaz.",
+won:"🎉 Kazandın! Doğru sayı ",
+lost:"Oyun Bitti. Doğru sayı ",
+revealed:"Doğru sayı ",
+resetMsg:"İstatistikler sıfırlandı."
+},
+de:{
+rule1:"• Erste Ziffer darf nicht 0 sein",
+rule2:"• Keine doppelten Ziffern",
+correct:"Richtige Position",
+wrongPlace:"Richtige Ziffer, falsche Position",
+wrong:"Ziffer nicht enthalten",
+digitLabel:"Ziffernlänge:",
+start:"Spiel Starten",
+reveal:"Aufdecken",
+submit:"Raten",
+reset:"Statistik Zurücksetzen",
+statsTitle:"Statistik",
+games:"Spiele",
+wins:"Siege",
+losses:"Verluste",
+winRate:"Gewinnrate",
+avgAttempts:"Ø Versuche",
+currentStreak:"Serie",
+bestStreak:"Beste Serie",
+enterAll:"Bitte alle Ziffern eingeben.",
+noZero:"Erste Ziffer darf nicht 0 sein.",
+noRepeat:"Keine doppelten Ziffern erlaubt.",
+won:"🎉 Gewonnen! Die Zahl war ",
+lost:"Spiel vorbei. Die Zahl war ",
+revealed:"Die richtige Zahl war ",
+resetMsg:"Statistik wurde zurückgesetzt."
+}
+};
+
+function changeLanguage(){
+currentLanguage=document.getElementById("languageSelect").value;
+localStorage.setItem("digitLang",currentLanguage);
+applyTranslations();
+}
+
+function applyTranslations(){
+const t=translations[currentLanguage];
+document.getElementById("rule1").innerText=t.rule1;
+document.getElementById("rule2").innerText=t.rule2;
+document.getElementById("ruleCorrect").innerText=t.correct;
+document.getElementById("ruleWrongPlace").innerText=t.wrongPlace;
+document.getElementById("ruleWrong").innerText=t.wrong;
+document.getElementById("digitLabel").innerText=t.digitLabel;
+document.getElementById("startBtn").innerText=t.start;
+document.getElementById("revealBtn").innerText=t.reveal;
+document.getElementById("submitBtn").innerText=t.submit;
+document.getElementById("resetBtn").innerText=t.reset;
+document.getElementById("languageSelect").value=currentLanguage;
+
+updateStatsPanel();
+}
+
+/* --- Game logic --- */
+
+let targetNumber="";
+let digitLength=4;
+let gameActive=false;
+let attempts=0;
+const maxAttempts=6;
+let digitState={};
+
+let stats=JSON.parse(localStorage.getItem("digitStats"))||{
+games:0,wins:0,losses:0,totalAttempts:0,currentStreak:0,bestStreak:0
+};
+
+function saveStats(){localStorage.setItem("digitStats",JSON.stringify(stats));}
+
+function resetStatistics(){
+stats={games:0,wins:0,losses:0,totalAttempts:0,currentStreak:0,bestStreak:0};
+localStorage.removeItem("digitStats");
+saveStats();
+updateStatsPanel();
+showStatus(translations[currentLanguage].resetMsg);
+}
+
+function updateStatsPanel(){
+const t=translations[currentLanguage];
+let winRate=stats.games?((stats.wins/stats.games)*100).toFixed(1):0;
+let avgAttempts=stats.wins?(stats.totalAttempts/stats.wins).toFixed(2):0;
+document.getElementById("statsPanel").innerHTML=
+`<strong>${t.statsTitle}</strong><br>
+${t.games}: ${stats.games}<br>
+${t.wins}: ${stats.wins}<br>
+${t.losses}: ${stats.losses}<br>
+${t.winRate}: ${winRate}%<br>
+${t.avgAttempts}: ${avgAttempts}<br>
+${t.currentStreak}: ${stats.currentStreak}<br>
+${t.bestStreak}: ${stats.bestStreak}`;
+}
+
+function generateNumber(length){
+let digits=[];
+while(digits.length<length){
+let r=Math.floor(Math.random()*10);
+if(digits.length===0&&r===0)continue;
+if(!digits.includes(r))digits.push(r);
+}
+return digits.join("");
+}
+
+function startGame(){
+if(gameActive&&attempts>0){
+stats.games++;stats.losses++;stats.currentStreak=0;saveStats();
+}
+digitLength=parseInt(document.getElementById("digitCount").value);
+targetNumber=generateNumber(digitLength);
+attempts=0;gameActive=true;
+initProgressBar();initDigitPanel();updateStatsPanel();
+document.getElementById("submitBtn").disabled=false;
+document.getElementById("revealBtn").disabled=false;
+document.getElementById("history").innerHTML="";
+document.getElementById("statusMessage").innerHTML="";
+document.getElementById("gameBoard").innerHTML="";
+for(let i=0;i<digitLength;i++){
+let input=document.createElement("input");
+input.type="text";input.maxLength=1;input.className="digit";
+input.addEventListener("input",function(){
+this.value=this.value.replace(/[^0-9]/g,"");
+if(this.value&&this.nextElementSibling)this.nextElementSibling.focus();
+});
+input.addEventListener("keydown",function(e){
+if(e.key==="Backspace"&&!this.value&&this.previousElementSibling)
+this.previousElementSibling.focus();
+if(e.key==="Enter")checkGuess();
+});
+document.getElementById("gameBoard").appendChild(input);
+}
+document.querySelector(".digit").focus();
+}
+
+function checkGuess(){
+if(!gameActive)return;
+let inputs=document.querySelectorAll(".digit");
+let guess="";inputs.forEach(i=>guess+=i.value);
+const t=translations[currentLanguage];
+if(guess.length!==digitLength){showStatus(t.enterAll);return;}
+if(guess[0]==="0"){showStatus(t.noZero);return;}
+if(new Set(guess).size!==guess.length){showStatus(t.noRepeat);return;}
+attempts++;updateProgressBar();
+let plus=0,minus=0;
+const row=document.createElement("div");row.className="historyRow";
+for(let i=0;i<digitLength;i++){
+const box=document.createElement("div");
+box.className="box";box.innerText=guess[i];
+if(guess[i]===targetNumber[i]){
+box.classList.add("correct");plus++;updateDigitState(guess[i],"correct");
+}
+else if(targetNumber.includes(guess[i])){
+box.classList.add("wrongPlace");minus++;updateDigitState(guess[i],"wrongPlace");
+}
+else{
+box.classList.add("wrong");updateDigitState(guess[i],"wrong");
+}
+row.appendChild(box);
+}
+const result=document.createElement("div");
+result.className="resultText";
+result.innerText="+ "+plus+" | - "+minus;
+row.appendChild(result);
+document.getElementById("history").appendChild(row);
+if(plus===digitLength){
+stats.games++;
+stats.wins++;
+stats.totalAttempts+=attempts;
+stats.currentStreak++;
+if(stats.currentStreak>stats.bestStreak)
+stats.bestStreak=stats.currentStreak;
+
+saveStats();
+setWinProgressBar();   // 👈 BURAYA EKLİYORSUN
+endGame(t.won+targetNumber);
+return;
+}
+if(attempts>=maxAttempts){
+stats.games++;stats.losses++;stats.currentStreak=0;saveStats();
+endGame(t.lost+targetNumber);return;
+}
+inputs.forEach(i=>i.value="");inputs[0].focus();
+}
+
+function revealAnswer(){
+if(!gameActive)return;
+const t=translations[currentLanguage];
+stats.games++;stats.losses++;stats.currentStreak=0;saveStats();
+endGame(t.revealed+targetNumber);
+}
+
+function endGame(message){
+gameActive=false;
+document.getElementById("submitBtn").disabled=true;
+document.getElementById("revealBtn").disabled=true;
+document.getElementById("gameBoard").innerHTML="";
+document.getElementById("statusMessage").innerHTML=
+"<div class='status-main'>"+message+"</div>";
+updateStatsPanel();
+}
+
+function showStatus(message){
+document.getElementById("statusMessage").innerHTML=
+"<div class='status-sub'>"+message+"</div>";
+}
+
+function initProgressBar(){
+const container=document.getElementById("progressContainer");
+container.innerHTML="";
+for(let i=0;i<maxAttempts;i++){
+const seg=document.createElement("div");
+seg.className="progress-segment";
+seg.id="segment-"+i;
+container.appendChild(seg);
+}
+}
+
+function updateProgressBar(){
+for(let i=0;i<maxAttempts;i++){
+const seg=document.getElementById("segment-"+i);
+seg.className="progress-segment";
+if(i<attempts)seg.classList.add("active");
+}
+}
+
+function setWinProgressBar(){
+    for(let i=0;i<attempts;i++){
+        const seg=document.getElementById("segment-"+i);
+        seg.className="progress-segment win";
+    }
+}
+
+function initDigitPanel(){
+const panel=document.getElementById("digitPanel");
+panel.innerHTML="";
+digitState={};
+for(let i=0;i<=9;i++){
+digitState[i]="unused";
+const key=document.createElement("div");
+key.className="digitKey";
+key.innerText=i;
+key.id="key-"+i;
+panel.appendChild(key);
+}
+}
+
+function updateDigitState(digit,state){
+const priority={correct:3,wrongPlace:2,wrong:1,unused:0};
+if(priority[state]>priority[digitState[digit]]){
+digitState[digit]=state;
+const key=document.getElementById("key-"+digit);
+key.className="digitKey key-"+state;
+}
+}
+
+applyTranslations();
+updateStatsPanel();
+
+</script>
+</body>
+</html>
