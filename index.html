@@ -32,15 +32,16 @@ body {
     position: absolute;
     top: 20px;
     right: 25px;
-    font-size: 13px;
-    opacity: 0.8;
+    font-size: 16px;   /* büyüttük */
+    opacity: 0.9;
 }
 
 .lang-box select {
     border: none;
     background: #f2f2f2;
-    border-radius: 10px;
-    padding: 4px 8px;
+    border-radius: 12px;
+    padding: 6px 10px;
+    font-size: 15px;
 }
 
 /* Branding */
@@ -113,9 +114,10 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .secondary { background: #f2f2f2; color: #333; }
 
 select {
-    padding: 6px;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
     border: 1px solid #ccc;
+    font-size: 16px;   /* büyüttük */
 }
 
 #gameBoard {
@@ -128,14 +130,16 @@ select {
 }
 
 input.digit {
-    width: clamp(40px, 12vw, 56px);
-    height: clamp(50px, 14vw, 68px);
-    font-size: clamp(18px, 5vw, 24px);
+    flex: 1;
+    max-width: 56px;           /* üst limit */
+    height: 56px;
+    font-size: 22px;
     text-align: center;
     border-radius: 12px;
     border: 1px solid #ccc;
-    margin: 0;       /* 🔥 margin sıfır */
+    margin: 0;
     box-sizing: border-box;
+    caret-color: transparent;  /* 🔥 imleci gizler */
 }
 
 .historyRow {
@@ -207,7 +211,23 @@ input.digit {
 
 .signature:hover {
     opacity: 0.9;
+	
+	/* --- Mobile Fixes --- */
+
+html, body {
+    overflow-x: hidden;
 }
+
+input, select {
+    font-size: 16px; /* iOS zoom engeller */
+}
+}
+
+#digitLabel {
+    font-size: 18px;
+    font-weight: 600;
+}
+
 </style>
 </head>
 
@@ -445,7 +465,7 @@ for(let i=0;i<digitLength;i++){
 let input=document.createElement("input");
 
 input.type="text";
-input.inputMode="numeric";     // mobil numeric keyboard
+input.inputMode="tel";   // 🔥 ENTER tuşu gelir
 input.pattern="[0-9]*";        // iOS numeric trigger
 input.autocomplete="off";
 input.maxLength=1;
