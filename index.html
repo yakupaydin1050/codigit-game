@@ -18,8 +18,9 @@ body {
 
 .app-container {
     position: relative;
-    width: 540px;
-    padding: 40px;
+    width: 95%;
+    max-width: 540px;
+    padding: clamp(20px, 4vw, 40px);
     background: white;
     border-radius: 24px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.08);
@@ -124,9 +125,9 @@ select {
 }
 
 input.digit {
-    width: 48px;
-    height: 58px;
-    font-size: 22px;
+    width: clamp(40px, 12vw, 58px);
+    height: clamp(50px, 14vw, 70px);
+    font-size: clamp(18px, 5vw, 24px);
     text-align: center;
     margin: 6px;
     border-radius: 12px;
@@ -141,11 +142,11 @@ input.digit {
 }
 
 .box {
-    width: 40px;
-    height: 50px;
+    width: clamp(32px, 10vw, 48px);
+    height: clamp(42px, 12vw, 58px);
     margin: 4px;
-    line-height: 50px;
-    font-size: 18px;
+    line-height: clamp(42px, 12vw, 58px);
+    font-size: clamp(16px, 4vw, 20px);
     font-weight: 600;
     border-radius: 10px;
 }
@@ -193,7 +194,7 @@ input.digit {
     position: absolute;
     bottom: 18px;
     right: 22px;
-    text-align: right;
+    text-align: right;   /* BUNU EKLİYORUZ */
     font-size: 11px;
     letter-spacing: 0.6px;
     opacity: 0.35;
@@ -214,7 +215,6 @@ input.digit {
     <div>crafted by YA-AY</div>
     <div class="sig-sub">AI-assisted build · v1.0</div>
 </div>
-
 <div class="lang-box">
 🌐 <select id="languageSelect" onchange="changeLanguage()">
 <option value="en">EN</option>
@@ -439,16 +439,25 @@ document.getElementById("statusMessage").innerHTML="";
 document.getElementById("gameBoard").innerHTML="";
 for(let i=0;i<digitLength;i++){
 let input=document.createElement("input");
-input.type="text";input.maxLength=1;input.className="digit";
+
+input.type="text";
+input.inputMode="numeric";     // mobil numeric keyboard
+input.pattern="[0-9]*";        // iOS numeric trigger
+input.autocomplete="off";
+input.maxLength=1;
+input.className="digit";
+
 input.addEventListener("input",function(){
 this.value=this.value.replace(/[^0-9]/g,"");
 if(this.value&&this.nextElementSibling)this.nextElementSibling.focus();
 });
+
 input.addEventListener("keydown",function(e){
 if(e.key==="Backspace"&&!this.value&&this.previousElementSibling)
 this.previousElementSibling.focus();
 if(e.key==="Enter")checkGuess();
 });
+
 document.getElementById("gameBoard").appendChild(input);
 }
 document.querySelector(".digit").focus();
@@ -580,7 +589,4 @@ updateStatsPanel();
 
 </script>
 </body>
-
 </html>
-
-
