@@ -32,16 +32,15 @@ body {
     position: absolute;
     top: 20px;
     right: 25px;
-    font-size: 16px;   /* büyüttük */
-    opacity: 0.9;
+    font-size: 13px;
+    opacity: 0.8;
 }
 
 .lang-box select {
     border: none;
     background: #f2f2f2;
-    border-radius: 12px;
-    padding: 6px 10px;
-    font-size: 15px;
+    border-radius: 10px;
+    padding: 4px 8px;
 }
 
 /* Branding */
@@ -114,32 +113,25 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .secondary { background: #f2f2f2; color: #333; }
 
 select {
-    padding: 8px 10px;
-    border-radius: 10px;
+    padding: 6px;
+    border-radius: 8px;
     border: 1px solid #ccc;
-    font-size: 16px;   /* büyüttük */
 }
 
 #gameBoard {
     display: flex;
     justify-content: center;
-    gap: 8px;        /* margin yerine gap */
     margin-top: 15px;
-    flex-wrap: nowrap;
-    width: 100%;
 }
 
 input.digit {
-    flex: 1;
-    max-width: 56px;           /* üst limit */
-    height: 56px;
-    font-size: 22px;
+    width: clamp(40px, 12vw, 58px);
+    height: clamp(50px, 14vw, 70px);
+    font-size: clamp(18px, 5vw, 24px);
     text-align: center;
+    margin: 6px;
     border-radius: 12px;
     border: 1px solid #ccc;
-    margin: 0;
-    box-sizing: border-box;
-    caret-color: transparent;  /* 🔥 imleci gizler */
 }
 
 .historyRow {
@@ -173,14 +165,13 @@ input.digit {
 }
 
 .digitKey {
-    width: 60px;
-    height: 48px;
-    line-height: 48px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    margin: 4px;
+    line-height: 36px;
+    border-radius: 8px;
     font-weight: 600;
     background: #e5e5e5;
-    cursor: pointer;
-    user-select: none;
 }
 
 .key-correct { background: #30d158; color: white; }
@@ -212,23 +203,7 @@ input.digit {
 
 .signature:hover {
     opacity: 0.9;
-	
-	/* --- Mobile Fixes --- */
-
-html, body {
-    overflow-x: hidden;
 }
-
-input, select {
-    font-size: 16px; /* iOS zoom engeller */
-}
-}
-
-#digitLabel {
-    font-size: 18px;
-    font-weight: 600;
-}
-
 </style>
 </head>
 
@@ -466,9 +441,11 @@ for(let i=0;i<digitLength;i++){
 let input=document.createElement("input");
 
 input.type="text";
-input.readOnly = true;        // 🔥 klavye tamamen kapalı
-input.maxLength = 1;
-input.className = "digit";
+input.inputMode="numeric";     // mobil numeric keyboard
+input.pattern="[0-9]*";        // iOS numeric trigger
+input.autocomplete="off";
+input.maxLength=1;
+input.className="digit";
 
 input.addEventListener("input",function(){
 this.value=this.value.replace(/[^0-9]/g,"");
@@ -483,6 +460,7 @@ if(e.key==="Enter")checkGuess();
 
 document.getElementById("gameBoard").appendChild(input);
 }
+document.querySelector(".digit").focus();
 }
 
 function checkGuess(){
@@ -584,38 +562,17 @@ function setWinProgressBar(){
 }
 
 function initDigitPanel(){
-    const panel = document.getElementById("digitPanel");
-    panel.innerHTML = "";
-    digitState = {};
-
-    const layout = [
-        ["1","2","3"],
-        ["4","5","6"],
-        ["7","8","9"],
-        ["DEL","0","ENTER"]
-    ];
-
-    layout.forEach(row=>{
-        const rowDiv = document.createElement("div");
-        rowDiv.style.display="flex";
-        rowDiv.style.justifyContent="center";
-        rowDiv.style.gap="8px";
-        rowDiv.style.marginBottom="8px";
-
-        row.forEach(keyVal=>{
-            const key=document.createElement("div");
-            key.className="digitKey";
-            key.innerText=keyVal;
-
-            key.addEventListener("click",()=>{
-                handleKeyPress(keyVal);
-            });
-
-            rowDiv.appendChild(key);
-        });
-
-        panel.appendChild(rowDiv);
-    });
+const panel=document.getElementById("digitPanel");
+panel.innerHTML="";
+digitState={};
+for(let i=0;i<=9;i++){
+digitState[i]="unused";
+const key=document.createElement("div");
+key.className="digitKey";
+key.innerText=i;
+key.id="key-"+i;
+panel.appendChild(key);
+}
 }
 
 function updateDigitState(digit,state){
@@ -627,38 +584,9 @@ key.className="digitKey key-"+state;
 }
 }
 
-function handleKeyPress(value){
-    if(!gameActive) return;
-
-    const inputs=document.querySelectorAll(".digit");
-
-    if(value==="DEL"){
-        for(let i=inputs.length-1;i>=0;i--){
-            if(inputs[i].value!==""){
-                inputs[i].value="";
-                break;
-            }
-        }
-        return;
-    }
-
-    if(value==="ENTER"){
-        checkGuess();
-        return;
-    }
-
-    for(let i=0;i<inputs.length;i++){
-        if(inputs[i].value===""){
-            inputs[i].value=value;
-            break;
-        }
-    }
-}
-
 applyTranslations();
 updateStatsPanel();
 
 </script>
 </body>
 </html>
-
